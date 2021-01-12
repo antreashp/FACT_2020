@@ -42,10 +42,10 @@ if __name__ == "__main__":
     shape = [10,20,30]
     batch_size = 32
     mlp = MLP(shape)
-    print(self.model)
+    print(mlp.model)
 
     x = torch.rand([batch_size,shape[0]])
     print('input shape: ',x.shape)
     out = mlp(x)
-    print('output shape: ',ou.shape)
+    print('output shape: ',out.shape)
     
