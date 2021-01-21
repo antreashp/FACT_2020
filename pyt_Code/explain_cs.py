@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 def explain(load_model, x_means, y_means, path=None,
             lambda_global=0.5, init_mode="zero",
             consecutive_steps=10, learning_rate=0.0005, clip_val=5.0, min_iters=2000, stopping_iters=2000, tol=0.0001,
-            discount=0.99,
-            verbose=False):
+            discount=0.99, verbose=False):
     num_clusters = x_means.shape[0]
     n_input = x_means.shape[1]
     n_output = y_means.shape[1]
