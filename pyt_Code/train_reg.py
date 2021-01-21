@@ -49,7 +49,7 @@ def train(encoder,decoder,learner,optimizer,criterion,bm,bm_val,bm_test,batch_si
             loss_op.backward()
             optimizer.step()
             if epoch % freq_eval == 0:
-                val_loss = val(encoder,decoder,learner,criterion,bm_val,batch_size,stopping_epochs,min_epochs,n,recon_weight)
+                val_loss = val(encoder,decoder,learner,optimizer,criterion,bm_val,batch_size,stopping_epochs,min_epochs,n,recon_weight)
                 if val_loss < best_loss-tol:
                     print(epoch, ' ',val_loss.item())
                     best_loss = val_loss
@@ -57,11 +57,11 @@ def train(encoder,decoder,learner,optimizer,criterion,bm,bm_val,bm_test,batch_si
                     '''TODO save model'''
 
             epoch += 1
-        test_loss = test(encoder,decoder,learner,criterion,bm_test,batch_size,stopping_epochs,min_epochs,n,recon_weight)
+        test_loss = test(encoder,decoder,learner,optimizer,criterion,bm_test,batch_size,stopping_epochs,min_epochs,n,recon_weight)
         print('test_loss',test_loss)
         return encoder,decoder,learner
 
-def val(encoder,decoder,learner,criterion,bm_val,batch_size,stopping_epochs,min_epochs,n,recon_weight):
+def val(encoder,decoder,learner,optimizer,criterion,bm_val,batch_size,stopping_epochs,min_epochs,n,recon_weight):
     best_epoch = 0 
     best_loss = np.inf
     epoch = 0
@@ -98,7 +98,7 @@ def val(encoder,decoder,learner,criterion,bm_val,batch_size,stopping_epochs,min_
             # optimizer.step()
             return loss_op
 
-def test(encoder,decoder,learner,criterion,bm_test,batch_size,stopping_epochs,min_epochs,n,recon_weight):
+def test(encoder,decoder,learner,optimizer,criterion,bm_test,batch_size,stopping_epochs,min_epochs,n,recon_weight):
     best_epoch = 0 
     best_loss = np.inf
     epoch = 0
@@ -131,8 +131,8 @@ def test(encoder,decoder,learner,criterion,bm_test,batch_size,stopping_epochs,mi
             # print('recon_loss',recon_loss)
             loss_op = model_loss.float() + (float(recon_weight)* recon_loss.float())
             # print('loss_op',loss_op)
-            # loss_op.backward()
-            # optimizer.step()
+            loss_op.backward()
+            optimizer.step()
 
             return loss_op
 

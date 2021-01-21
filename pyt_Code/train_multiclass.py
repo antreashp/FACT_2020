@@ -36,16 +36,17 @@ def train(encoder,decoder,learner,optimizer,CE,criterion,bm,bm_val,bm_test,batch
         # Stopping condition
         if epoch - best_epoch > stopping_epochs and epoch > min_epochs:
             break
-
+        D = torch.autograd.Variable(torch.from_numpy(np.zeros((1, x_batch.shape[1]))).float(),requires_grad=True)
         # Run a training epoch
         for i in tqdm(range(total_batch)):
             x_batch, y_batch = bm.next_batch(batch_size = batch_size)
             # summary, _ = sess.run([summary_op, train_op], feed_dict = {X: x_batch, Y: y_batch})
             # train_writer.add_summary(summary, epoch * total_batch + i)
             optimizer.zero_grad()
-            x_batch = torch.from_numpy(x_batch).float()
+            x_batch = torch.autograd.Variable(torch.from_numpy(x_batch).float(),requires_grad=True)
             y_batch = torch.from_numpy(y_batch).long()
-            rep = encoder(x_batch)
+
+            rep = encoder(x_batch+D)#+D? 
             # print('rep',rep)
             recon = decoder(rep)
             # print('recon',recon)
@@ -60,8 +61,9 @@ def train(encoder,decoder,learner,optimizer,CE,criterion,bm,bm_val,bm_test,batch
             recon_loss = criterion(x_batch,recon)
             # print('recon_loss',recon_loss)
             pred = learner(rep)
-            prob = soft(pred,axis=1)
-            prob_i = 
+            prob = soft(pred)
+            prob_i = torch.gather(prob,dim=1,index =[] )
+            grad_i = torch.autograd.grad(prob_i, x_batch)
             loss_op = model_loss.float() + (float(recon_weight)* recon_loss.float())
             # print('loss_op',loss_op)
             loss_op.backward()
