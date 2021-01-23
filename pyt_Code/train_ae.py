@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.tensorboard import SummaryWriter
 
 from base import  MLP, BatchManager
-
+from tqdm import tqdm
 def train_ae(x,
           encoder_shape = [100, 100, 100, 2], decoder_shape = [2, 100, 100, 100],
           learning_rate = 0.001, batch_size = 4, min_epochs = 100, stopping_epochs = 50, tol = 0.001, freq_eval = 1,
@@ -39,14 +39,14 @@ def train_ae(x,
     # Batch Manager
     y_train = np.zeros((n, 1))  # Dumby variable to let use the BatchManager
     bm = BatchManager(x_train, y_train)
-
+    x_val = torch.from_numpy(x_val).float()
     # Build the models
     encoder = MLP(encoder_shape)
     decoder = MLP(decoder_shape)
 
     # Define the loss and optimizer
     loss_op = torch.nn.MSELoss()
-    optimizer = torch.optim.Adam([encoder.params, decoder.params], lr=learning_rate)
+    optimizer = torch.optim.Adam(list(encoder.parameters())+list(decoder.parameters()), lr=learning_rate)
 
     # Train and evaluate the model
     best_epoch = 0
@@ -54,6 +54,7 @@ def train_ae(x,
     epoch = 0
     total_batch = int(n / batch_size)
 
+    hyper_parameters = {'encoder_shape':encoder_shape,'decoder_shape':decoder_shape}
     while True:
 
         # Stopping condition
@@ -61,9 +62,11 @@ def train_ae(x,
             break
 
         # Run a training epoch
-        for i in range(total_batch):
+        for i in tqdm(range(total_batch)):
             optimizer.zero_grad()
             x_batch, y_batch = bm.next_batch(batch_size=batch_size)
+            x_batch = torch.from_numpy(x_batch).float()
+            y_batch = torch.from_numpy(y_batch).float()
             rep = encoder(x_batch)
             recon = decoder(rep)
             recon_loss = loss_op(x_batch, recon)
@@ -83,8 +86,8 @@ def train_ae(x,
                 print(epoch, " ", val_loss)
                 best_loss = val_loss
                 best_epoch = epoch
-                torch.save(encoder_shape, encoder.state_dict(), epoch, "./model_encoder.pt")
-                torch.save(decoder_shape, decoder.state_dict(), epoch, "./model_decoder.pt")
+                torch.save({'shape':encoder_shape ,'state_dict':encoder.state_dict(), 'epochs':epoch}, "./model_encoder.pt")
+                torch.save({'shape':decoder_shape, 'state_dict':decoder.state_dict(), 'epochs':epoch}, "./model_decoder.pt")
 
             writer.add_scalar("Loss/val", val_loss, epoch)
 
@@ -94,17 +97,20 @@ def train_ae(x,
 
     # Evaluate the final model
     encoder_checkpoint = torch.load("./model_encoder.pt")
-    encoder_best = MLP(encoder_checkpoint["hyper_parameters"]["shape"])
+
+    encoder_best = MLP(encoder_checkpoint["shape"])
     encoder_best.load_state_dict(encoder_checkpoint["state_dict"].copy())
 
     # Find the 2d point representation
     points = np.zeros((n, 2))
     for i in range(total_batch):
+
         start = i * batch_size
         stop = min(n, (i + 1) * batch_size)
         x_batch = x[start:stop, :]
+        x_batch = torch.from_numpy(x_batch).float()
         points_batch = encoder_best(x_batch)
-        points[start:stop, :] = points_batch
+        points[start:stop, :] = points_batch.detach()
     plt.scatter(points[:, 0], points[:, 1], s=10)
     plt.savefig("representation.pdf")
     plt.close()
