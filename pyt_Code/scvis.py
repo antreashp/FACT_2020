@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 
 class scvis(nn.Module):
-    def __init__(self, encoder_shape, decoder_shape, activate_op=nn.ELU(), eps=1e-6, max_sigma_square=1e10, initial=None):
+    def __init__(self, encoder_shape, decoder_shape, activate_op=nn.ELU(), eps=1e-6, max_sigma_square=1e10, prob=0.5, initial=None):
         if initial is None:  # Do not define this operation if
             initial = nn.Sequential(nn.Linear(encoder_shape[0], decoder_shape[1]),  # encoder_shape[0] should be the input size
                                     activate_op)
 
-        self.encoder = scvis_encoder(encoder_shape, activate_op, eps, max_sigma_square, initial)
+        self.encoder = scvis_encoder(encoder_shape, activate_op, eps, max_sigma_square, prob, initial)
         self.decoder = scvis_decoder(decoder_shape, activate_op, eps, max_sigma_square)
 
     def forward(self, x):

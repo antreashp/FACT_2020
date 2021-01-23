@@ -10,6 +10,7 @@ def load_model(path="models/scvis.pt"):
                           activate_op=checkpoint["hyper_parameters"]["activate_op"],
                           eps=checkpoint["hyper_parameters"]["eps"],
                           max_sigma_square=checkpoint["hyper_parameters"]["max_sigma_square"],
+                          prob=checkpoint["hyper_parameters"]["prob"],
                           initial=checkpoint["hyper_parameters"]["initial"])
     model.load_state_dict(state_dict)
     return model
