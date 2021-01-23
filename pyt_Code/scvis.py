@@ -24,7 +24,7 @@ class scvis(nn.Module):
         return self.decoder(z)
 
 class scvis_encoder(nn.Module):
-    def __init__(self, shape, activate_op=nn.ELU(), eps=1e-6, max_sigma_square=1e10, initial=None):
+    def __init__(self, shape, activate_op=nn.ELU(), eps=1e-6, max_sigma_square=1e10, prob=0.5, initial=None):
         if initial is None:  # Do not define this operation if
             self.initial_layers = nn.Sequential(nn.Linear(shape[0], shape[1]),  # shape[0] should be the input size
                                                 activate_op)
@@ -36,11 +36,19 @@ class scvis_encoder(nn.Module):
 
         self.soft_plus = nn.Softplus()
 
+        self.prob = prob
         self.eps = eps
         self.max_sigma_square = max_sigma_square
 
-    def forward(self, x):
+    def forward(self, x, prob=None):
         hidden_layer_out = self.initial_layers(x)
+        if prob != 0 and self.training:
+            if prob is None:
+                dropout = nn.Dropout(self.prob)
+            else:
+                dropout = nn.Dropout(prob)
+            hidden_layer_out = dropout(hidden_layer_out)
+
         mu = self.mu_layer(hidden_layer_out)
         sigma = self.sigma_layer(hidden_layer_out)
         return mu, torch.clamp(self.soft_plus(sigma), self.eps, self.max_sigma_square)
