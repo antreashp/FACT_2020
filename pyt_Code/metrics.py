@@ -2,8 +2,8 @@
 from matplotlib.path import Path
 import numpy as np
 from sklearn.metrics.pairwise import euclidean_distances
-import tensorflow as tf
-
+# import tensorflow as tf
+import torch
 from misc import truncate
 
 def metrics(load_model, x, indices, deltas, epsilon, k = None):
@@ -12,7 +12,11 @@ def metrics(load_model, x, indices, deltas, epsilon, k = None):
     num_clusters = len(indices)
 
     # Define the objective function
-    sess, rep, X, D = load_model()
+
+
+    encoder = load_model('Model/model_encoder.pt')
+    decoder = load_model('Model/model_decoder.pt')
+    
 
     correctness = np.zeros((num_clusters, num_clusters))
     coverage = np.zeros((num_clusters, num_clusters))
@@ -39,10 +43,10 @@ def metrics(load_model, x, indices, deltas, epsilon, k = None):
                     d = truncate(d, k)
                 
                 # Find the representation of the initial points after they have been transformed
-                rep_init = sess.run(rep, feed_dict={X: x_init, D: np.reshape(d, (1, n_input))})
+                rep_init = encoder(x_init)#sess.run(rep, feed_dict={X: x_init, D: np.reshape(d, (1, n_input))})
                 
                 # Find the representation of the target points without any transformation
-                rep_target = sess.run(rep, feed_dict={X: x_target, D: np.zeros((1, n_input))})
+                rep_target = encoder(x_target)#sess.run(rep, feed_dict={X: x_target, D: np.zeros((1, n_input))})
                 
                 # Calculate pairwise l2 distance
                 dists = euclidean_distances(rep_init, Y = rep_target)
