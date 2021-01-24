@@ -6,6 +6,7 @@ import sys
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from torch.utils.tensorboard import SummaryWriter
+import shutil
 
 from base import  MLP, BatchManager
 from tqdm import tqdm
@@ -17,7 +18,11 @@ def train_ae(x,
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Setup directory
-    os.system("rm -rf Model")
+    if os.name == "nt":  # For Windows compatibility
+        shutil.rmtree('Model')
+    else:
+        os.system("rm -rf Model")
+
     cwd = os.getcwd()
     os.makedirs("Model")
     os.chdir("Model")
