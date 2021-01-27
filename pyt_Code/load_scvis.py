@@ -1,8 +1,7 @@
 import torch
-import torch.nn as nn
 from scvis import scvis_encoder
 
-def load_model(path="models/scvis.pt"):
+def load_model(path="models/scvis.pt", get_hparams=False):
     checkpoint = torch.load(path)
     state_dict = checkpoint["state_dict"].copy()
     model = scvis_encoder(encoder_shape=checkpoint["hyper_parameters"]["encoder_shape"],
@@ -13,4 +12,7 @@ def load_model(path="models/scvis.pt"):
                           prob=checkpoint["hyper_parameters"]["prob"],
                           initial=checkpoint["hyper_parameters"]["initial"])
     model.load_state_dict(state_dict)
-    return model
+    if get_hparams:
+        return model, checkpoint["hyper_parameters"]
+    else:
+        return model
