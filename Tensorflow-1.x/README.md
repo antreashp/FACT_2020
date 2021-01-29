@@ -26,7 +26,6 @@ This repo contains an implementation of TGT as well as all of the code to reprod
 * Clone the svcis github project to svcis folder
 * Clone the Integrated Gradients github project to Integrated-Gradients folder
 * If you are using conda use the provided env.yml to load the environment
-* Alternatively, you can find all the requirements in requirements.txt
 * Run scvis/setup.py
 
 
