@@ -22,10 +22,12 @@ This repo contains an implementation of TGT as well as all of the code to reprod
 * vertices.py is provided in the {Dataset} folder which can be used for manually picking the clusters
 * train_scvis.sh script is provided in the {Dataset} folder to train a vae model for the data
 * All the datasets have trained models in {Dataset}/Model folder which can be used by default to reproduce the results
-
-# Steps to run the experiments
+# Setup
 * Clone the svcis github project to svcis folder
 * Clone the Integrated Gradients github project to Integrated-Gradients folder
+* Run scvis/setup.py
+
+# Steps to run the experiments
 * Use the run.ipynb notebooks to reproduce the results
 * Alternatively, one can experiment from the scratch by following the below steps
     * Train the model using {Dataset}/train_scvis.sh providing the arguments as necessary for the dataset
